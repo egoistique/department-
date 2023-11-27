@@ -1,9 +1,6 @@
 package department.servlet;
 
-import department.data.dao.EmployeeDAO;
 import department.data.model.Employee;
-import department.di.annotation.Inject;
-import department.di.factory.BeanFactory;
 import department.service.CompanyService;
 
 import javax.servlet.ServletConfig;
@@ -19,7 +16,6 @@ import java.util.List;
 
 @WebServlet("/employee")
 public class EmployeeServlet extends HttpServlet {
-
     private final CompanyService service = new CompanyService();
 
     public EmployeeServlet() throws SQLException {
@@ -37,8 +33,24 @@ public class EmployeeServlet extends HttpServlet {
         resp.setContentType("text/html");
         PrintWriter printWriter = resp.getWriter();
 
+        if ("delete".equals(req.getParameter("action"))) {
+            String employeeIdStr = req.getParameter("employeeId");
+            if (employeeIdStr != null) {
+                try {
+                    int employeeId = Integer.parseInt(employeeIdStr);
+                    service.removeEmployee(employeeId);
+                    resp.sendRedirect(req.getContextPath() + "/employee");
+                    return;
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    printWriter.write("Error occurred while deleting employee.");
+                    printWriter.close();
+                    return;
+                }
+            }
+        }
+
         if (req.getParameter("action") != null && req.getParameter("action").equals("new")) {
-            // Отображение формы для создания нового сотрудника
             printWriter.write("<html><body>");
             printWriter.write("<h1>Create New Employee</h1>");
             printWriter.write("<form method='post'>");
@@ -50,7 +62,6 @@ public class EmployeeServlet extends HttpServlet {
             printWriter.write("</form>");
             printWriter.write("</body></html>");
         } else {
-            // Вывод списка сотрудников
             List<Employee> employees;
             try {
                 employees = service.getAllEmployees();
@@ -60,30 +71,26 @@ public class EmployeeServlet extends HttpServlet {
                 printWriter.close();
                 return;
             }
-
             printWriter.write("<html><body><h1>Employee List</h1>");
             printWriter.write("<a href='/employee?action=new'>New Employee</a><br><br>");
             printWriter.write("<ul>");
             for (Employee employee : employees) {
-                printWriter.write("<li>Name: " + employee.getName() + ", Age: " + employee.getAge() + ", Salary: " + employee.getSalary() + "</li>");
+                printWriter.write("<li>Name: " + employee.getName() + ", Age: " + employee.getAge() + ", Salary: " + employee.getSalary());
+                printWriter.write("<a href='/employee?action=delete&employeeId=" + employee.getId() + "'>Delete</a>");
+                printWriter.write("</li>");
             }
+
             printWriter.write("</ul></body></html>");
         }
-
         printWriter.close();
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Получение данных о новом сотруднике из параметров запроса
         String name = request.getParameter("name");
         int age = Integer.parseInt(request.getParameter("age"));
         double salary = Double.parseDouble(request.getParameter("salary"));
         String department = request.getParameter("department");
 
-        // Создание нового сотрудника
-
-
-        // Сохранение нового сотрудника
         try {
             service.addEmployeeToDepartment(department, name, age, salary);
         } catch (SQLException e) {
@@ -91,15 +98,32 @@ public class EmployeeServlet extends HttpServlet {
             response.getWriter().write("Error occurred while creating employee.");
             return;
         }
-
-        // Перенаправление на страницу списка сотрудников после создания
         response.sendRedirect(request.getContextPath() + "/employee");
     }
 
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String employeeIdStr = request.getParameter("employeeId");
+
+        if (employeeIdStr != null) {
+            try {
+                int employeeId = Integer.parseInt(employeeIdStr);
+                service.removeEmployee(employeeId);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                response.getWriter().write("Error occurred while deleting employee.");
+                return;
+            }
+
+            response.sendRedirect(request.getContextPath() + "/employee");
+        } else {
+            response.getWriter().write("No employee ID provided.");
+        }
+    }
+
+
     @Override
     public void destroy() {
-        // Закрываем ресурсы при уничтожении сервлета
-        //service.exit();
+        service.exit();
         super.destroy();
     }
 }

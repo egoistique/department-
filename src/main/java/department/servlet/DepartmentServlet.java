@@ -35,8 +35,24 @@ public class DepartmentServlet extends HttpServlet {
         resp.setContentType("text/html");
         PrintWriter printWriter = resp.getWriter();
 
+        if ("delete".equals(req.getParameter("action"))) {
+            String departmentIdStr = req.getParameter("departmentId");
+            if (departmentIdStr != null) {
+                try {
+                    int departmentId = Integer.parseInt(departmentIdStr);
+                    service.deleteDepartment(departmentId);
+                    resp.sendRedirect(req.getContextPath() + "/department");
+                    return;
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    printWriter.write("Error occurred while deleting employee.");
+                    printWriter.close();
+                    return;
+                }
+            }
+        }
+
         if (req.getParameter("action") != null && req.getParameter("action").equals("new")) {
-            // Отображение формы для создания нового отдела
             printWriter.write("<html><body>");
             printWriter.write("<h1>Create New Department</h1>");
             printWriter.write("<form method='post'>");
@@ -45,7 +61,6 @@ public class DepartmentServlet extends HttpServlet {
             printWriter.write("</form>");
             printWriter.write("</body></html>");
         } else {
-            // Вывод списка отделов
             List<Department> departments;
             try {
                 departments = service.getAllDepartments();
@@ -66,7 +81,6 @@ public class DepartmentServlet extends HttpServlet {
                     e.printStackTrace();
                 }
 
-                // Получаем список сотрудников отдела
                 List<Employee> employees = null;
                 try {
                     employees = service.getEmployeesFromDepartment(department.getId());
@@ -80,6 +94,7 @@ public class DepartmentServlet extends HttpServlet {
                     printWriter.write("<li>Name: " + employee.getName() + ", Age: " + employee.getAge() + ", Salary: " + employee.getSalary() + "</li>");
                 }
                 printWriter.write("</ul>");
+                printWriter.write("<a href='/department?action=delete&departmentId=" + department.getId() + "'>Delete</a>");
             }
             printWriter.write("</body></html>");
         }
@@ -88,13 +103,7 @@ public class DepartmentServlet extends HttpServlet {
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Получение данных о новом отделе из параметров запроса
         String name = request.getParameter("name");
-
-        // Создание нового отдела
-
-
-        // Сохранение нового отдела
         try {
             service.addDepartment(name);
         } catch (SQLException e) {
@@ -103,15 +112,31 @@ public class DepartmentServlet extends HttpServlet {
             return;
         }
 
-        // Перенаправление на страницу списка отделов после создания
         response.sendRedirect(request.getContextPath() + "/department");
     }
 
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String departmentIdStr = request.getParameter("departmentId");
+
+        if (departmentIdStr != null) {
+            try {
+                int departmentId = Integer.parseInt(departmentIdStr);
+                service.deleteDepartment(departmentId);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                response.getWriter().write("Error occurred while deleting department.");
+                return;
+            }
+
+            response.sendRedirect(request.getContextPath() + "/department");
+        } else {
+            response.getWriter().write("No department ID provided.");
+        }
+    }
 
     @Override
     public void destroy() {
-        // Закрываем ресурсы при уничтожении сервлета
-        //service.exit();
+        service.exit();
         super.destroy();
     }
 }
