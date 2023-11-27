@@ -38,7 +38,6 @@ public class EmployeeServlet extends HttpServlet {
         resp.setContentType("text/html");
         PrintWriter printWriter = resp.getWriter();
 
-        // Получаем список всех сотрудников
         List<Employee> employees;
         try {
             employees = service.getAllEmployees();
