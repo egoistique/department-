@@ -34,6 +34,7 @@ public class UpdateEmployeeServlet extends HttpServlet {
 
                 printWriter.write("<html><body>");
                 printWriter.write("<h1>Update Employee</h1>");
+                printWriter.write("<a href='/employee'>Back</a><br><br>");
                 printWriter.write("<form method='post'>");
                 printWriter.write("Name: <input type='text' name='name' value='" + employee.getName() + "'><br>");
                 printWriter.write("Age: <input type='number' name='age' value='" + employee.getAge() + "'><br>");

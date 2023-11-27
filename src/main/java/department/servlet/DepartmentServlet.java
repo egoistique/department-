@@ -72,6 +72,7 @@ public class DepartmentServlet extends HttpServlet {
             }
 
             printWriter.write("<html><body><h1>Departments</h1>");
+            printWriter.write("<a href='/'>Back</a><br><br>");
             printWriter.write("<a href='/department?action=new'>New Department</a><br><br>");
             for (Department department : departments) {
                 printWriter.write("<h2>Name: " + department.getName() + "</h2>");

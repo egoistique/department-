@@ -32,6 +32,7 @@ public class UpdateDepartmentServlet extends HttpServlet {
 
                 printWriter.write("<html><body>");
                 printWriter.write("<h1>Update Department</h1>");
+                printWriter.write("<a href='/department'>Back</a><br><br>");
                 printWriter.write("<form method='post'>");
                 printWriter.write("Name: <input type='text' name='name' value='" + department.getName() + "'><br>");
                 printWriter.write("<input type='hidden' name='departmentId' value='" + departmentId + "'>");

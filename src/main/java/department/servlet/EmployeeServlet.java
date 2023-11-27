@@ -72,6 +72,9 @@ public class EmployeeServlet extends HttpServlet {
                 return;
             }
             printWriter.write("<html><body><h1>Employee List</h1>");
+            printWriter.write("<html><head><title>Employee List</title></head><body>");
+            printWriter.write("<a href='/'>Back</a><br><br>");
+
             printWriter.write("<a href='/employee?action=new'>New Employee</a><br><br>");
             printWriter.write("<ul>");
             for (Employee employee : employees) {
