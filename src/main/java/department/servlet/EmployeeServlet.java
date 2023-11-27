@@ -77,6 +77,8 @@ public class EmployeeServlet extends HttpServlet {
             for (Employee employee : employees) {
                 printWriter.write("<li>Name: " + employee.getName() + ", Age: " + employee.getAge() + ", Salary: " + employee.getSalary());
                 printWriter.write("<a href='/employee?action=delete&employeeId=" + employee.getId() + "'>Delete</a>");
+                printWriter.write("<a href='/updateEmployee?employeeId=" + employee.getId() + "'>Update</a>");
+
                 printWriter.write("</li>");
             }
 

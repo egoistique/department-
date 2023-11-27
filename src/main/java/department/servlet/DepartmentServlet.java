@@ -95,6 +95,7 @@ public class DepartmentServlet extends HttpServlet {
                 }
                 printWriter.write("</ul>");
                 printWriter.write("<a href='/department?action=delete&departmentId=" + department.getId() + "'>Delete</a>");
+                printWriter.write("<a href='/updateDepartment?departmentId=" + department.getId() + "'>Update</a>");
             }
             printWriter.write("</body></html>");
         }
