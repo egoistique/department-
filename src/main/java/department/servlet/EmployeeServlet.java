@@ -33,31 +33,67 @@ public class EmployeeServlet extends HttpServlet {
         }
     }
 
-    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("text/html");
         PrintWriter printWriter = resp.getWriter();
 
-        List<Employee> employees;
+        if (req.getParameter("action") != null && req.getParameter("action").equals("new")) {
+            // Отображение формы для создания нового сотрудника
+            printWriter.write("<html><body>");
+            printWriter.write("<h1>Create New Employee</h1>");
+            printWriter.write("<form method='post'>");
+            printWriter.write("Name: <input type='text' name='name'><br>");
+            printWriter.write("Age: <input type='number' name='age'><br>");
+            printWriter.write("Salary: <input type='text' name='salary'><br>");
+            printWriter.write("Department: <input type='text' name='department'><br>");
+            printWriter.write("<input type='submit' value='Create'>");
+            printWriter.write("</form>");
+            printWriter.write("</body></html>");
+        } else {
+            // Вывод списка сотрудников
+            List<Employee> employees;
+            try {
+                employees = service.getAllEmployees();
+            } catch (SQLException e) {
+                e.printStackTrace();
+                printWriter.write("Error occurred while retrieving employees.");
+                printWriter.close();
+                return;
+            }
+
+            printWriter.write("<html><body><h1>Employee List</h1>");
+            printWriter.write("<a href='/employee?action=new'>New Employee</a><br><br>");
+            printWriter.write("<ul>");
+            for (Employee employee : employees) {
+                printWriter.write("<li>Name: " + employee.getName() + ", Age: " + employee.getAge() + ", Salary: " + employee.getSalary() + "</li>");
+            }
+            printWriter.write("</ul></body></html>");
+        }
+
+        printWriter.close();
+    }
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Получение данных о новом сотруднике из параметров запроса
+        String name = request.getParameter("name");
+        int age = Integer.parseInt(request.getParameter("age"));
+        double salary = Double.parseDouble(request.getParameter("salary"));
+        String department = request.getParameter("department");
+
+        // Создание нового сотрудника
+
+
+        // Сохранение нового сотрудника
         try {
-            employees = service.getAllEmployees();
+            service.addEmployeeToDepartment(department, name, age, salary);
         } catch (SQLException e) {
-            // Обработка ошибки, если что-то пошло не так при получении списка
             e.printStackTrace();
-            // Можно также отправить пользователю сообщение об ошибке
-            printWriter.write("Error occurred while retrieving employees.");
-            printWriter.close();
+            response.getWriter().write("Error occurred while creating employee.");
             return;
         }
 
-        // Формируем HTML для вывода списка сотрудников
-        printWriter.write("<html><body><h1>Employee List</h1><ul>");
-        for (Employee employee : employees) {
-            printWriter.write("<li>Name: " + employee.getName() + ", Age: " + employee.getAge() + ", Salary: " + employee.getSalary() + "</li>");
-        }
-        printWriter.write("</ul></body></html>");
-
-        printWriter.close();
+        // Перенаправление на страницу списка сотрудников после создания
+        response.sendRedirect(request.getContextPath() + "/employee");
     }
 
     @Override
